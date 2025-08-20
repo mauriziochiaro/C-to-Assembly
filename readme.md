@@ -116,6 +116,33 @@ _main:
 0000000100003f7f        jmp     0x100003eb0       ; Jump back to the top to do it all again (the while(1) loop)
 ```
 
+### 3. Clang vs. GCC
+
+GCC is more conservative. At -O2 (and even -O3), it doesn't solve the puzzle. Instead, it optimizes the existing loop to run faster by using fast CPU registers instead of the slow stack. The calculations still happen at runtime, but they're much quicker.
+If you force it with -funroll-all-loops, GCC still doesn't pre-calculate the numbers. It performs partial unrolling: it duplicates the loop's body a few times to reduce the number of jumps, which is a different kind of speed boost.
+
+-O3 GCC compilation with -funroll-all-loops flag:
+```assembly
+.L2:
+	movl	%ebx, %edx        ; printf(x)
+	movq	%rdi, %rcx
+	addl	%esi, %ebx        ; z = y + x  (ebx = esi + ebx)
+	call	printf
+	cmpl	$254, %esi        ; if (y > 254) ...
+	jg	.L3
+    
+	movl	%esi, %edx        ; printf(y)
+	movq	%rdi, %rcx
+	addl	%ebx, %esi        ; x = z + y (esi = ebx + esi)
+	call	printf
+	cmpl	$254, %ebx        ; if (z > 254) ...
+	jg	.L3
+
+    ; ... repeat for 8 times ...
+
+	jmp	.L2               ; After 8 iterations, jump back to the beginning (L2)
+```
+
 ## How to Replicate This Yourself
 
 Follow the instructions for your operating system to compile and inspect the code.
@@ -151,4 +178,9 @@ On these systems, the cleanest way to view the compiler's output is to ask it to
 2.  **Generate OPTIMIZED assembly:**
     ```bash
     gcc -S -O2 -o fib_opt.s fib.c
+    ```
+
+3.  **Force partial unrolling to see a different strategy:**
+    ```bash
+    gcc -S -O3 -funroll-all-loops -o fib_opt_unroll.s fib.c
     ```
