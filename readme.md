@@ -139,40 +139,16 @@ Follow the instructions for your operating system to compile and inspect the cod
     otool -tv fib_opt
     ```
 
-### Linux
+### Linux / Windows (using GCC)
 
-1.  **Compile with NO optimization:**
+On these systems, the cleanest way to view the compiler's output is to ask it to generate an assembly file directly using the -S flag. This avoids the extra code included in a full executable.
+
+1.  **Generate UNOPTIMIZED assembly:**
     ```bash
-    gcc -O0 -o fib_no_opt fib.c
-    ```
-2.  **View the unoptimized assembly:**
-    ```bash
-    objdump -d fib_no_opt
-    ```
-3.  **Compile WITH optimization:**
-    ```bash
-    gcc -O2 -o fib_opt fib.c
-    ```
-4.  **View the optimized assembly:**
-    ```bash
-    objdump -d fib_opt
+    gcc -S -O0 -o fib_no_opt.s fib.c
     ```
 
-### Windows
-
-1.  **Compile with NO optimization:**
+2.  **Generate OPTIMIZED assembly:**
     ```bash
-    gcc -O0 -o fib_no_opt.exe fib.c
-    ```
-2.  **View the unoptimized assembly:**
-    ```bash
-    objdump -d fib_no_opt.exe
-    ```
-3.  **Compile WITH optimization:**
-    ```bash
-    gcc -O2 -o fib_opt.exe fib.c
-    ```
-4.  **View the optimized assembly:**
-    ```bash
-    objdump -d fib_opt.exe
+    gcc -S -O2 -o fib_opt.s fib.c
     ```
